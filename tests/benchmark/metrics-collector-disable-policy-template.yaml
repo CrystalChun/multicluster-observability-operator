@@ -1,0 +1,99 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-simulate-metrics-__CLUSTER__-__NUMBER__-disable
+  namespace: default
+  annotations:
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: policy-simulate-metrics-__CLUSTER__-__NUMBER__-disable
+      spec:
+        remediationAction: inform # will be overridden by remediationAction in parent policy
+        severity: low
+        namespaceSelector:
+          exclude: ["kube-*"]
+          include: ["default"]
+        object-templates:
+          - complianceType: mustnothave
+            objectDefinition:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: simulate-managed-__CLUSTER__-__NUMBER__
+          - complianceType: mustnothave
+            objectDefinition:
+              apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: metrics-collector-serving-certs-ca-bundle
+                namespace: simulate-managed-__CLUSTER__-__NUMBER__
+          - complianceType: mustnothave
+            objectDefinition:
+              apiVersion: v1
+              kind: ServiceAccount
+              metadata:
+                name: endpoint-observability-operator-sa
+                namespace: simulate-managed-__CLUSTER__-__NUMBER__
+          - complianceType: mustnothave
+            objectDefinition:
+              apiVersion: v1
+              kind: ClusterRoleBinding
+              apiVersion: rbac.authorization.k8s.io/v1
+              metadata:
+                name: metrics-collector-view-__CLUSTER__-__NUMBER__
+              subjects:
+                - kind: ServiceAccount
+                  name: endpoint-observability-operator-sa
+                  namespace: simulate-managed-__CLUSTER__-__NUMBER__
+              roleRef:
+                apiGroup: rbac.authorization.k8s.io
+                kind: ClusterRole
+                name: cluster-monitoring-view
+          - complianceType: mustnothave
+            objectDefinition:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: observability-managed-cluster-certs
+                namespace: simulate-managed-__CLUSTER__-__NUMBER__
+          - complianceType: mustnothave
+            objectDefinition:
+              kind: Deployment
+              apiVersion: apps/v1
+              metadata:
+                name: simulate-metrics-collector-deployment-__CLUSTER__-__NUMBER__
+                namespace: simulate-managed-1
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-simulate-metrics-__CLUSTER__-__NUMBER__-disable
+  namespace: default
+placementRef:
+  name: placement-policy-simulate-metrics-__CLUSTER__-__NUMBER__-disable
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-simulate-metrics-__CLUSTER__-__NUMBER__-disable
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-simulate-metrics-__CLUSTER__-__NUMBER__-disable
+  namespace: default
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - {key: name, operator: In, values: ["__CLUSTER__"]}
+
