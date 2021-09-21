@@ -1,0 +1,510 @@
+---
+# ManifestWork template file that creates a metrics collector on a target k8s cluster that emits synthetic SNO 4.8 metrics
+# Apply this resource on the ACM hub to simulate managed k8s cluster as simulated OpenShift SNO managed cluster
+# The k8s cluster must be added to ACM first as a managed cluster
+apiVersion: work.open-cluster-management.io/v1
+kind: ManifestWork
+metadata:
+  name: $CLUSTER-simulate-sno-obs
+  namespace: $CLUSTER
+spec:
+  workload:
+    manifests:
+    - apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: open-cluster-management-addon-observability
+    - apiVersion: v1
+      data:
+        # TODO: Extract and replace with contents of observability-managed-cluster-certs in local cluster
+        ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURjakNDQWxxZ0F3SUJBZ0lRWEhoNENPUVZtSU9BSHBMTFlGYmgxREFOQmdrcWhraUc5dzBCQVFzRkFEQlQKTVFzd0NRWURWUVFHRXdKVlV6RVdNQlFHQTFVRUNoTU5VbVZrSUVoaGRDd2dTVzVqTGpFc01Db0dBMVVFQXhNagpiMkp6WlhKMllXSnBiR2wwZVMxelpYSjJaWEl0WTJFdFkyVnlkR2xtYVdOaGRHVXdIaGNOTWpFd09URTNNVFF6Ck1EQTBXaGNOTWpZd09URTJNVFF6TURBMFdqQlRNUXN3Q1FZRFZRUUdFd0pWVXpFV01CUUdBMVVFQ2hNTlVtVmsKSUVoaGRDd2dTVzVqTGpFc01Db0dBMVVFQXhNamIySnpaWEoyWVdKcGJHbDBlUzF6WlhKMlpYSXRZMkV0WTJWeQpkR2xtYVdOaGRHVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDdUIzSUVTdC93ClVzYzFpR0QvR3gwL1RuUCtFTXovU1VUbVBuUDhNMk5NSisyeEkvZDd2eGhEMXNHZzZ2UlI2N1pOY3czdHFDS0UKWW9CcXBiUU12QmM4Q0JMRmtjU3RzTnlaaFJUOVkvRm1KSGo1L0RQSkhpd2FNcUVONkVLRkloMXV0bmVibXF6SgpxaW9nTXhPZUpZeVZJT09EZFpsN1hFbkhlNkhITkFvMUcxcmJDaHFlRTMwT1IrOERrWm5PSnZMZE5wRm40OVdqClJBeS9TSUZNMWdtL2JSb3JPRFR5ZkpubkQzcFlSOXVCWkxwV1NEbWxMWUEzSDhDNlFUcnZzZWJLZm1GY1psUlQKb280Yjd3RTZzTkpsazNGa01ZMVdkbEtTNTQ0M1lLRno1M0d4dDkrSnNIYld5ZTZETFVvbXcxV1ZmSGtMQ3BvUgpJRlM0NEx5ZG1Jd0xBZ01CQUFHalFqQkFNQTRHQTFVZER3RUIvd1FFQXdJQ3BEQVBCZ05WSFJNQkFmOEVCVEFECkFRSC9NQjBHQTFVZERnUVdCQlNWVk5kdEZtNlRLdjNUd0J2bkJPYjFuTVdlS1RBTkJna3Foa2lHOXcwQkFRc0YKQUFPQ0FRRUFESGZEbWNQb3dPV2ljb01ETEQva1FROFRaeFFoakE4a001MmNPd2x5RVd3cXgxb1MvNDZ6Q2hDaApLTU02VG1ZWEcvUThjZ20zTEc2U2dpdUdvazdKemJ5YXFrVzlPNWpjdUYyRDZTcGFQeVR6UUc3SCtGTU5NTm1KCkRVb1lsRDBzSGxDbzlyK3JYT2JsdmlDajhNbFRhVlArRlN4K0ZuYWNSaHVheFJjM1N0TEhsaktGUHREL1kzYlQKZ3V6cktnYlNVZzl2V1I5S3NLUmhUSE9HNXo2am1MbXNTQWlNMTZ6UjlaOTR6aU54UWZiY1h4MjN5LzcveXFxZAp3WnA4Q2tKZkUxenAzK0cycDhkc2RxVXBMSGdRZlV0cFFzR3h3dDdkRE5TUzhIVEdzVHBuWi83T0JLL0QvZElvCmd2clJrbEpTeHZUK25sZUN3a1IzOVdLTzUvSFZoZz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+      kind: Secret
+      metadata:
+        name: observability-managed-cluster-certs
+        namespace: open-cluster-management-addon-observability
+### Signer client cert - Grab from hub cluster's open-cluster-management-addon-observability
+    - apiVersion: v1
+      data:
+        tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURDVENDQWZHZ0F3SUJBZ0lVY0VrQnhVb1Nmb2MreXZadEhaWnlVMHJqSEs0d0RRWUpLb1pJaHZjTkFRRUwKQlFBd1V6RUxNQWtHQTFVRUJoTUNWVk14RmpBVUJnTlZCQW9URFZKbFpDQklZWFFzSUVsdVl5NHhMREFxQmdOVgpCQU1USTI5aWMyVnlkbUZpYVd4cGRIa3RZMnhwWlc1MExXTmhMV05sY25ScFptbGpZWFJsTUI0WERUSXhNRGt4Ck56RTBNekV3TUZvWERUSXlNRGt4TnpFME16RXdNRm93TmpFTU1Bb0dBMVVFQ3hNRFlXTnRNU1l3SkFZRFZRUUQKRXgxdFlXNWhaMlZrTFdOc2RYTjBaWEl0YjJKelpYSjJZV0pwYkdsMGVUQlpNQk1HQnlxR1NNNDlBZ0VHQ0NxRwpTTTQ5QXdFSEEwSUFCQXNDQmxoemRhOWxMNWYzNDh0N0VicHdBTUxZcmxnMzJCUGtZT2J0UnQwOHpPWWx0SVJUCnZQdWJNS0IyYmJGaWJKekcwSURxSHphWm9wVTlIUy9zODZlamdid3dnYmt3RGdZRFZSMFBBUUgvQkFRREFnV2cKTUJNR0ExVWRKUVFNTUFvR0NDc0dBUVVGQndNQ01Bd0dBMVVkRXdFQi93UUNNQUF3SFFZRFZSME9CQllFRkxZdAo0eFBIajFNSlhVbTFWeWhXZ3N1TzlmemdNQjhHQTFVZEl3UVlNQmFBRkhtRmc3TnVBR1IyL3RTb2xhMHNNL2lkCjVFYXBNRVFHQTFVZEVRUTlNRHVDT1c5aWMyVnlkbUZpYVd4cGRIa3RZMjl1ZEhKdmJHeGxjaTVoWkdSdmJpNXYKY0dWdUxXTnNkWE4wWlhJdGJXRnVZV2RsYldWdWRDNXBiekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBQWU3VQppWFZsSlB1TWwyT29sR2R1RmFET0hmUTFGMWpDMHhxQ1haWU5NR2FRdWZrMVJ2RGMxaHk0VHBIcFBNVVFDV2haCmtkRWN4ZXJBVkY0UDlKL1pIbjEzUjBXYVR5am5lM09PM3QxZER1UVRaTkVhcU1SdGpRUUh5RFh3MGN3MHdXeDQKdkdVcGx3QVd5MGgyNEM4VE14SFlSMnp5N1NFWFZQcVJMTFc5MDBWMk9RTElRTmc3VVBJVjVBb2FqcFBvMGhmTQpacy9tMzRBeXZjR2J1VEFPS3hva2EwMlNXbTY2bW9KUElCK0w3V0l6T3BUeW1NRFRUUXlBZnVSUDdQTjdSZmR1CkN0R3hFS1ZSS2RVY1E4Tk1YY3MwNlNQUWFZSW9ybmFZd09TT2c0Z0l0V0ozWndZVjk2Mm00aFZtU2owWmRwSHoKamdIZThRdE9haEw2UVo5M2pRPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+        tls.key: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUdBaFdJUXNSTW4rSnpRckFQWi9PNTAzbUk5Z2hXYVQwYWZxYWlYNkI1dytvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFQ3dJR1dITjFyMlV2bC9mankzc1J1bkFBd3RpdVdEZllFK1JnNXUxRzNUek01aVcwaEZPOAorNXN3b0hadHNXSnNuTWJRZ09vZk5wbWlsVDBkTCt6enB3PT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+      kind: Secret
+      metadata:
+        name: observability-controller-open-cluster-management.io-observability-signer-client-cert
+        namespace: open-cluster-management-addon-observability
+      type: Opaque
+### Cluster Role
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: open-cluster-management:endpoint-observability-operator
+      rules:
+      - apiGroups:
+        - ""
+        resources:
+        - namespaces
+        verbs:
+        - get
+      - apiGroups:
+        - ""
+        resources:
+        - nodes
+        - nodes/proxy
+        verbs:
+        - list
+        - watch
+        - get
+      - apiGroups:
+        - ""
+        resources:
+        - configmaps
+        - pods
+        - secrets
+        - services
+        - serviceaccounts
+        verbs:
+        - create
+        - get
+        - list
+        - watch
+        - delete
+        - update
+      - apiGroups:
+        - apps
+        resources:
+        - deployments
+        - daemonsets
+        - replicasets
+        - statefulsets
+        verbs:
+        - get
+        - list
+        - watch
+        - create
+        - update
+        - delete
+      - apiGroups:
+        - rbac.authorization.k8s.io
+        resources:
+        - clusterroles
+        - clusterrolebindings
+        - roles
+        - rolebindings
+        verbs:
+        - get
+        - list
+        - watch
+        - create
+        - update
+        - delete
+      - apiGroups:
+        - observability.open-cluster-management.io
+        resources:
+        - multiclusterobservabilities
+        - observabilityaddons
+        verbs:
+        - list
+        - watch
+        - get
+      - apiGroups:
+        - observability.open-cluster-management.io
+        resources:
+        - observabilityaddons/status
+        verbs:
+        - get
+        - update
+      - apiGroups:
+        - config.openshift.io
+        resources:
+        - clusterversions
+        - infrastructures
+        verbs:
+        - list
+        - watch
+        - get
+      - apiGroups:
+        - work.open-cluster-management.io
+        resources:
+        - appliedmanifestworks
+        verbs:
+        - get
+      - apiGroups:
+        - work.open-cluster-management.io
+        resources:
+        - appliedmanifestworks/finalizers
+        verbs:
+        - update
+      - apiGroups:
+        - coordination.k8s.io
+        resources:
+        - leases
+        verbs:
+        - get
+        - list
+        - watch
+        - create
+        - update
+        - delete
+      - apiGroups:
+        - ""
+        resources:
+        - nodes/metrics
+        verbs:
+        - get
+      - nonResourceURLs:
+        - /metrics
+        - /federate
+        verbs:
+        - get
+      - apiGroups:
+        - authentication.k8s.io
+        resources:
+        - tokenreviews
+        verbs:
+        - create
+      - apiGroups:
+        - authorization.k8s.io
+        resources:
+        - subjectaccessreviews
+        verbs:
+        - create
+      - apiGroups:
+        - networking.k8s.io
+        resources:
+        - networkpolicies
+        - ingresses
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - ""
+        resources:
+        - endpoints
+        - limitranges
+        - namespaces
+        - persistentvolumeclaims
+        - persistentvolumes
+        - replicationcontrollers
+        - resourcequotas
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - admissionregistration.k8s.io
+        resources:
+        - mutatingwebhookconfigurations
+        - validatingwebhookconfigurations
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - autoscaling
+        resources:
+        - horizontalpodautoscalers
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - batch
+        resources:
+        - cronjobs
+        - jobs
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - certificates.k8s.io
+        resources:
+        - certificatesigningrequests
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - policy
+        resources:
+        - poddisruptionbudgets
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - storage.k8s.io
+        resources:
+        - storageclasses
+        - volumeattachments
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        resources:
+        - ingresses
+        verbs:
+        - get
+        - list
+        - watch
+### ClusterRoleBinding
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: open-cluster-management:endpoint-observability-operator-rb
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: open-cluster-management:endpoint-observability-operator
+      subjects:
+      - kind: ServiceAccount
+        name: endpoint-observability-operator-sa
+        namespace: open-cluster-management-addon-observability
+    - apiVersion: v1
+      imagePullSecrets:
+      - name: multiclusterhub-operator-pull-secret
+      kind: ServiceAccount
+      metadata:
+        name: endpoint-observability-operator-sa
+        namespace: open-cluster-management-addon-observability
+### metrics collector deployment
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: metrics-collector-deployment
+        namespace: open-cluster-management-addon-observability
+      spec:
+        progressDeadlineSeconds: 600
+        replicas: 1
+        revisionHistoryLimit: 10
+        selector:
+          matchLabels:
+            component: metrics-collector
+        strategy:
+          rollingUpdate:
+            maxSurge: 25%
+            maxUnavailable: 25%
+          type: RollingUpdate
+        template:
+          metadata:
+            creationTimestamp: null
+            labels:
+              component: metrics-collector
+          spec:
+            containers:
+            - command:
+              - /usr/bin/metrics-collector
+              - --from=$(FROM)
+              - --to-upload=$(TO)
+              - --interval=60s
+              - --limit-bytes=1073741824
+              ## TODOL: Set to target cluster name
+              - --label="cluster=k3s-deca4f1a"
+              ## TODOL: Set to target cluster name
+              - --label="clusterID=k3s-deca4f1a"
+              - --simulated-timeseries-file=/metrics-volume/timeseries.txt
+              - --from-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+              - --match={__name__=":node_memory_MemAvailable_bytes:sum"}
+              - --match={__name__="ALERTS"}
+              - --match={__name__="authenticated_user_requests"}
+              - --match={__name__="authentication_attempts"}
+              - --match={__name__="assisted_installer_cluster_creations"}
+              - --match={__name__="assisted_installer_cluster_installation_started"}
+              - --match={__name__="assisted_installer_cluster_installation_second"}
+              - --match={__name__="assisted_installer_cluster_host_installation_count"}
+              - --match={__name__="assisted_installer_host_installation_phase_seconds"}
+              - --match={__name__="assisted_installer_cluster_host_disk_sync_duration_ms"}
+              - --match={__name__="assisted_installer_cluster_host_image_pull_status"}
+              - --match={__name__="assisted_installer_filesystem_usage_percentage"}
+              - --match={__name__="cluster:capacity_cpu_cores:sum"}
+              - --match={__name__="cluster:capacity_memory_bytes:sum"}
+              - --match={__name__="cluster:container_cpu_usage:ratio"}
+              - --match={__name__="cluster:container_spec_cpu_shares:ratio"}
+              - --match={__name__="cluster:cpu_usage_cores:sum"}
+              - --match={__name__="cluster:memory_usage:ratio"}
+              - --match={__name__="cluster:memory_usage_bytes:sum"}
+              - --match={__name__="cluster:usage:resources:sum"}
+              - --match={__name__="cluster_infrastructure_provider"}
+              - --match={__name__="cluster_version"}
+              - --match={__name__="cluster_version_payload"}
+              - --match={__name__="container_cpu_cfs_periods_total"}
+              - --match={__name__="container_cpu_cfs_throttled_periods_total"}
+              - --match={__name__="container_spec_cpu_quota"}
+              - --match={__name__="coredns_dns_request_count_total"}
+              - --match={__name__="coredns_dns_request_duration_seconds_sum"}
+              - --match={__name__="coredns_dns_request_type_count_total"}
+              - --match={__name__="coredns_dns_response_rcode_count_total"}
+              - --match={__name__="etcd_debugging_mvcc_db_total_size_in_bytes"}
+              - --match={__name__="etcd_mvcc_db_total_size_in_bytes"}
+              - --match={__name__="etcd_debugging_snap_save_total_duration_seconds_sum"}
+              - --match={__name__="etcd_disk_backend_commit_duration_seconds_bucket"}
+              - --match={__name__="etcd_disk_backend_commit_duration_seconds_sum"}
+              - --match={__name__="etcd_disk_wal_fsync_duration_seconds_bucket"}
+              - --match={__name__="etcd_disk_wal_fsync_duration_seconds_sum"}
+              - --match={__name__="etcd_object_counts"}
+              - --match={__name__="etcd_network_client_grpc_received_bytes_total"}
+              - --match={__name__="etcd_network_client_grpc_sent_bytes_total"}
+              - --match={__name__="etcd_network_peer_received_bytes_total"}
+              - --match={__name__="etcd_network_peer_sent_bytes_total"}
+              - --match={__name__="etcd_server_client_requests_total"}
+              - --match={__name__="etcd_server_has_leader"}
+              - --match={__name__="etcd_server_health_failures"}
+              - --match={__name__="etcd_server_leader_changes_seen_total"}
+              - --match={__name__="etcd_server_proposals_failed_total"}
+              - --match={__name__="etcd_server_proposals_pending"}
+              - --match={__name__="etcd_server_proposals_committed_total"}
+              - --match={__name__="etcd_server_proposals_applied_total"}
+              - --match={__name__="etcd_server_quota_backend_bytes"}
+              - --match={__name__="grpc_server_started_total"}
+              - --match={__name__="haproxy_backend_connection_errors_total"}
+              - --match={__name__="haproxy_backend_connections_total"}
+              - --match={__name__="haproxy_backend_current_queue"}
+              - --match={__name__="haproxy_backend_http_average_response_latency_milliseconds"}
+              - --match={__name__="haproxy_backend_max_sessions"}
+              - --match={__name__="haproxy_backend_response_errors_total"}
+              - --match={__name__="haproxy_backend_up"}
+              - --match={__name__="http_requests_total"}
+              - --match={__name__="instance:node_filesystem_usage:sum"}
+              - --match={__name__="instance:node_cpu_utilisation:rate1m"}
+              - --match={__name__="instance:node_load1_per_cpu:ratio"}
+              - --match={__name__="instance:node_memory_utilisation:ratio"}
+              - --match={__name__="instance:node_network_receive_bytes_excluding_lo:rate1m"}
+              - --match={__name__="instance:node_network_receive_drop_excluding_lo:rate1m"}
+              - --match={__name__="instance:node_network_transmit_bytes_excluding_lo:rate1m"}
+              - --match={__name__="instance:node_network_transmit_drop_excluding_lo:rate1m"}
+              - --match={__name__="instance:node_num_cpu:sum"}
+              - --match={__name__="instance:node_vmstat_pgmajfault:rate1m"}
+              - --match={__name__="instance_device:node_disk_io_time_seconds:rate1m"}
+              - --match={__name__="instance_device:node_disk_io_time_weighted_seconds:rate1m"}
+              - --match={__name__="kube_daemonset_status_desired_number_scheduled"}
+              - --match={__name__="kube_daemonset_status_number_unavailable"}
+              - --match={__name__="kube_node_spec_unschedulable"}
+              - --match={__name__="kube_node_status_allocatable"}
+              - --match={__name__="kube_node_status_allocatable_cpu_cores"}
+              - --match={__name__="kube_node_status_allocatable_memory_bytes"}
+              - --match={__name__="kube_node_status_capacity"}
+              - --match={__name__="kube_node_status_capacity_pods"}
+              - --match={__name__="kube_node_status_capacity_cpu_cores"}
+              - --match={__name__="kube_node_status_condition"}
+              - --match={__name__="kube_pod_container_resource_limits"}
+              - --match={__name__="kube_pod_container_resource_limits_cpu_cores"}
+              - --match={__name__="kube_pod_container_resource_limits_memory_bytes"}
+              - --match={__name__="kube_pod_container_resource_requests"}
+              - --match={__name__="kube_pod_container_resource_requests_cpu_cores"}
+              - --match={__name__="kube_pod_container_resource_requests_memory_bytes"}
+              - --match={__name__="kube_pod_info"}
+              - --match={__name__="kube_pod_owner"}
+              - --match={__name__="kube_resourcequota"}
+              - --match={__name__="kubelet_running_container_count"}
+              - --match={__name__="kubelet_runtime_operations"}
+              - --match={__name__="kubelet_runtime_operations_latency_microseconds"}
+              - --match={__name__="kubelet_volume_stats_available_bytes"}
+              - --match={__name__="kubelet_volume_stats_capacity_bytes"}
+              - --match={__name__="kube_persistentvolume_status_phase"}
+              - --match={__name__="machine_cpu_cores"}
+              - --match={__name__="machine_memory_bytes"}
+              - --match={__name__="mixin_pod_workload"}
+              - --match={__name__="namespace:kube_pod_container_resource_requests_cpu_cores:sum"}
+              - --match={__name__="namespace:kube_pod_container_resource_requests_memory_bytes:sum"}
+              - --match={__name__="namespace:container_memory_usage_bytes:sum"}
+              - --match={__name__="namespace_cpu:kube_pod_container_resource_requests:sum"}
+              - --match={__name__="namespace_workload_pod:kube_pod_owner:relabel"}
+              - --match={__name__="node_cpu_seconds_total"}
+              - --match={__name__="node_filesystem_avail_bytes"}
+              - --match={__name__="node_filesystem_free_bytes"}
+              - --match={__name__="node_filesystem_size_bytes"}
+              - --match={__name__="node_memory_MemAvailable_bytes"}
+              - --match={__name__="node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate"}
+              - --match={__name__="node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate"}
+              - --match={__name__="node_netstat_Tcp_OutSegs"}
+              - --match={__name__="node_netstat_Tcp_RetransSegs"}
+              - --match={__name__="node_netstat_TcpExt_TCPSynRetrans"}
+              - --match={__name__="policyreport_info"}
+              - --match={__name__="up"}
+              - --match={__name__="cluster_monitoring_operator_reconcile_errors_total"}
+              - --match={__name__="cluster_monitoring_operator_reconcile_attempts_total"}
+              - --match={__name__="cluster_operator_conditions"}
+              - --match={__name__="cluster_operator_up"}
+              - --match={__name__="workqueue_queue_duration_seconds_bucket",job="apiserver"}
+              - --match={__name__="workqueue_adds_total",job="apiserver"}
+              - --match={__name__="workqueue_depth",job="apiserver"}
+              - --match={__name__="go_goroutines",job="apiserver"}
+              - --match={__name__="process_cpu_seconds_total",job="apiserver"}
+              - --match={__name__="process_resident_memory_bytes",job="apiserver"}
+              - --match={__name__="container_memory_cache",container!=""}
+              - --match={__name__="container_memory_rss",container!=""}
+              - --match={__name__="container_memory_swap",container!=""}
+              - --match={__name__="container_memory_working_set_bytes",container!=""}
+              - --rename="etcd_mvcc_db_total_size_in_bytes=etcd_debugging_mvcc_db_total_size_in_bytes"
+              - --rename="mixin_pod_workload=namespace_workload_pod:kube_pod_owner:relabel"
+              - --rename="namespace:kube_pod_container_resource_requests_cpu_cores:sum=namespace_cpu:kube_pod_container_resource_requests:sum"
+              - --rename="node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate=node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate"
+              - --recordingrule={"name":"apiserver_request_duration_seconds:histogram_quantile_99","query":"histogram_quantile(0.99,sum(rate(apiserver_request_duration_seconds_bucket{job=\"apiserver\",
+                verb!=\"WATCH\"}[5m])) by (verb,le))"}
+              - --recordingrule={"name":"apiserver_request_duration_seconds:histogram_quantile_99:instance","query":"histogram_quantile(0.99,
+                sum(rate(apiserver_request_duration_seconds_bucket{job=\"apiserver\", verb!=\"WATCH\"}[5m]))
+                by (le, instance))"}
+              - --recordingrule={"name":"sum:apiserver_request_total:1h","query":"sum(rate(apiserver_request_total{job=\"apiserver\"}[1h]))
+                by(code, instance)"}
+              - --recordingrule={"name":"sum:apiserver_request_total:5m","query":"sum(rate(apiserver_request_total{job=\"apiserver\"}[5m]))
+                by(code, instance)"}
+              - --recordingrule={"name":"rpc_rate:grpc_server_handled_total:sum_rate","query":"sum(rate(grpc_server_handled_total{job=\"etcd\",grpc_type=\"unary\",grpc_code!=\"OK\"}[5m]))"}
+              - --recordingrule={"name":"active_streams_watch:grpc_server_handled_total:sum","query":"sum(grpc_server_started_total{job=\"etcd\",grpc_service=\"etcdserverpb.Watch\",grpc_type=\"bidi_stream\"})
+                - sum(grpc_server_handled_total{job=\"etcd\",grpc_service=\"etcdserverpb.Watch\",grpc_type=\"bidi_stream\"})"}
+              - --recordingrule={"name":"active_streams_lease:grpc_server_handled_total:sum","query":"sum(grpc_server_started_total{job=\"etcd\",grpc_service=\"etcdserverpb.Lease\",grpc_type=\"bidi_stream\"})
+                - sum(grpc_server_handled_total{job=\"etcd\",grpc_service=\"etcdserverpb.Lease\",grpc_type=\"bidi_stream\"})"}
+              - --recordingrule={"name":"cluster:kube_pod_container_resource_requests:cpu:sum","query":"sum(sum(sum(kube_pod_container_resource_requests{resource=\"cpu\"})
+                by (pod,namespace,container) * on(pod,namespace) group_left(phase) max(kube_pod_status_phase{phase=~\"Running|Pending|Unknown\"}
+                >0) by (pod,namespace,phase)) by (pod,namespace,phase))"}
+              - --recordingrule={"name":"cluster:kube_pod_container_resource_requests:memory:sum","query":"sum(sum(sum(kube_pod_container_resource_requests{resource=\"memory\"})
+                by (pod,namespace,container) * on(pod,namespace) group_left(phase) max(kube_pod_status_phase{phase=~\"Running|Pending|Unknown\"}
+                >0) by (pod,namespace,phase)) by (pod,namespace,phase))"}
+              - --recordingrule={"name":"sli:apiserver_request_duration_seconds:trend:5m","query":"sum(increase(apiserver_request_duration_seconds_bucket{apiserver=\"kube-apiserver\",le=\"1\",verb=~\"POST|PUT|DELETE|PATCH\"}[5m]))
+                / sum(increase(apiserver_request_duration_seconds_count{apiserver=\"kube-apiserver\",verb=~\"POST|PUT|DELETE|PATCH\"}[5m]))"}
+              env:
+              # - name: FROM
+              #  value: https://prometheus-k8s:9091
+              - name: TO
+                value: https://observatorium-api-open-cluster-management-observability.apps.cchun.dev10.red-chesterfield.com/api/metrics/v1/default/api/v1/receive
+              image: quay.io/open-cluster-management/metrics-collector@sha256:e1344aafaadc02df49464affdd242ec1c27f702ea4213d2e1f9e07f69370243d
+              imagePullPolicy: Always
+              name: metrics-collector
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 100Mi
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              volumeMounts:
+              - mountPath: /tlscerts/certs
+                name: mtlscerts
+              - mountPath: /tlscerts/ca
+                name: mtlsca
+              - mountPath: /metrics-volume
+                name: metrics-volume
+            dnsPolicy: ClusterFirst
+            restartPolicy: Always
+            schedulerName: default-scheduler
+            securityContext: {}
+            serviceAccount: endpoint-observability-operator-sa
+            serviceAccountName: endpoint-observability-operator-sa
+            terminationGracePeriodSeconds: 30
+            volumes:
+            - name: mtlscerts
+              secret:
+                defaultMode: 420
+                secretName: observability-controller-open-cluster-management.io-observability-signer-client-cert
+            - name: mtlsca
+              secret:
+                defaultMode: 420
+                secretName: observability-managed-cluster-certs
+            - emptyDir: {}
+              name: metrics-volume
+            initContainers:
+                - command:
+                    - sh
+                    - -c
+                    - cp /tmp/timeseries.txt /metrics-volume
+                  image: quay.io/haoqing/metrics-data:sno
+                  imagePullPolicy: Always
+                  name: init-metrics
+                  volumeMounts:
+                    - mountPath: /metrics-volume
+                      name: metrics-volume
+###
