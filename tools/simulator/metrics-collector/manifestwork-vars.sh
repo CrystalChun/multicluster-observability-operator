@@ -21,7 +21,7 @@ thanos_url=$(oc get deployment metrics-collector-deployment -n open-cluster-mana
 # export OBS_SIGNER_CLIENT_TLS_KEY=LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUdBaFdJUXNSTW4rSnpRckFQWi9PNTAzbUk5Z2hXYVQwYWZxYWlYNkI1dytvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFQ3dJR1dITjFyMlV2bC9mankzc1J1bkFBd3RpdVdEZllFK1JnNXUxRzNUek01aVcwaEZPOAorNXN3b0hadHNXSnNuTWJRZ09vZk5wbWlsVDBkTCt6enB3PT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
 managed_cluster_ca_cert=$(oc get secret observability-managed-cluster-certs -o jsonpath='{.data.ca\.crt}' -n open-cluster-management-addon-observability)
 tls_cert=$(oc get secret observability-controller-open-cluster-management.io-observability-signer-client-cert -o jsonpath='{.data.tls\.crt}' -n open-cluster-management-addon-observability)
-tls_key=$(oc get secret observability-controller-open-cluster-management.io-observability-signer-client-cert -o jsonpath='{.data.tls\.crt}' -n open-cluster-management-addon-observability)
+tls_key=$(oc get secret observability-controller-open-cluster-management.io-observability-signer-client-cert -o jsonpath='{.data.tls\.key}' -n open-cluster-management-addon-observability)
 # TODO: Other possible values to customize
 # 1. Namespace to deploy on managed cluster. Defaults to open-cluster-management-addon-observability
 # 2. metrics collector image to use
