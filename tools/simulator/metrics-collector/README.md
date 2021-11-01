@@ -19,33 +19,29 @@ You must meet the following requirements to setup metrics collector:
 
 ## Quick Start
 ### Setup metrics collector
-You can run `setup-metrics-collector.sh` following with a number to setup multiple metrics collector.
-
-For example, setup 10 metrics collectors with the following command:
+You can run `manifestwork-vars.sh` to setup multiple metrics collector in each managed cluster.
+Syntax:
 ```
-# ./setup-metrics-collector.sh 10
-```
-Check if all the metrics collector running successfully in your cluster:
-```
-# oc get pods --all-namespaces | grep simulate-managed-cluster
-simulate-managed-cluster1                          metrics-collector-deployment-7d69d9f897-xn8vz                    1/1     Running            0          22h
-simulate-managed-cluster10                         metrics-collector-deployment-6698466fd8-9zxq2                    1/1     Running            0          22h
-simulate-managed-cluster2                          metrics-collector-deployment-67844bfc59-lwchn                    1/1     Running            0          22h
-simulate-managed-cluster3                          metrics-collector-deployment-56bc9485b4-gsxm9                    1/1     Running            0          22h
-simulate-managed-cluster4                          metrics-collector-deployment-85d7dd974d-hcm6n                    1/1     Running            0          22h
-simulate-managed-cluster5                          metrics-collector-deployment-76c9756648-pcw44                    1/1     Running            0          22h
-simulate-managed-cluster6                          metrics-collector-deployment-7557ccb5c6-l7m44                    1/1     Running            0          22h
-simulate-managed-cluster7                          metrics-collector-deployment-6994d95664-kb772                    1/1     Running            0          22h
-simulate-managed-cluster8                          metrics-collector-deployment-6c8794b786-jm52h                    1/1     Running            0          22h
-simulate-managed-cluster9                          metrics-collector-deployment-5fdcc96d99-gqwqf                    1/1     Running            0          22h
+# ./manifestwork-vars.sh <managed cluster starting index> <number of managed clusters> <hub name>
 ```
 
-> Note: if you want the simulated metrics-collector be scheduled to master node, so that more simulated metrics-collectors can be deployed, you can set the environment variable `ALLOW_SCHEDULED_TO_MASTER` to be `true` before executing the setup script.
+Each managed cluster's name begins with the prefix `k3s` and is followed by the index.
 
-### Clean metrics collector
-Use `clean-metrics-collector.sh` to remove all metrics collector you created.
+For example, setup 10 metrics collectors for managed clusters `k3s-3` to `k3s-5` with the following command:
 ```
-# ./clean-metrics-collector.sh 10
+# ./manifestwork-vars.sh 3 2 scale-hub
+```
+
+Check if the metrics collector running successfully in your managed cluster:
+```
+# kubectl get po -n open-cluster-management-addon-observability | grep metrics-collector-deployment
+metrics-collector-deployment-7d69d9f897-xn8vz                    1/1     Running            0          22h
+```
+
+Check if the metrics collector manifestwork has successfully deployed to your managed cluster:
+```
+# oc get manifestwork -n <managed cluster namespace>
+
 ```
 
 ## Generate your own metrics data source
